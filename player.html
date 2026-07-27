@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>mathbeasts — live playground</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; padding: 0; background: #090909; color: #cfcfcf;
+               font: 13px/1.5 system-ui, sans-serif; height: 100%; }
+  #wrap { display: flex; gap: 16px; padding: 16px; height: calc(100% - 32px); }
+  #panel { flex: 1 1 480px; display: flex; flex-direction: column; gap: 10px; min-width: 320px; }
+  #stagebox { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  #stage { width: 400px; height: 400px; background: #000; border: 1px solid #222; }
+  #stage canvas { width: 400px !important; height: 400px !important; }
+  h1 { font-size: 15px; margin: 0; color: #fff; font-weight: 600; }
+  h1 span { color: #666; font-weight: 400; }
+  select, button { background: #161616; color: #ddd; border: 1px solid #333;
+                   border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  button:hover, select:hover { border-color: #555; }
+  button.primary { background: #1e3a5f; border-color: #2d5a8f; color: #fff; }
+  #code { flex: 1; background: #0e0e0e; color: #b8e0b8; border: 1px solid #262626;
+          border-radius: 8px; padding: 10px; font: 12px/1.45 Consolas, monospace;
+          white-space: pre; resize: none; tab-size: 2; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row label { color: #888; }
+  input[type=range] { width: 140px; accent-color: #4a90d9; }
+  #speedval, #fpsval { color: #fff; min-width: 42px; display: inline-block; }
+  #err { color: #ff7b72; font-family: Consolas, monospace; font-size: 12px; min-height: 16px; }
+  .hint { color: #555; font-size: 12px; }
+  kbd { background: #1c1c1c; border: 1px solid #333; border-radius: 4px; padding: 0 5px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="panel">
+    <h1>mathbeasts playground <span>— edit the math, watch it live</span></h1>
+    <div class="row">
+      <select id="scene"></select>
+      <button id="run" class="primary">Run ▸ (Ctrl+Enter)</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Restart</button>
+    </div>
+    <textarea id="code" spellcheck="false"></textarea>
+    <div class="row">
+      <label>speed <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1">
+        <span id="speedval">1×</span></label>
+      <label>fps <input id="fps" type="range" min="5" max="60" step="1" value="30">
+        <span id="fpsval">30</span></label>
+    </div>
+    <div id="err"></div>
+    <div class="hint">Tweak any number — the <code>t +=</code> step (dt), particle count
+      (<code>2e4</code>), trig coefficients, alpha — then <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.
+      speed = extra draw() steps per tick; fps = ticks per second.</div>
+  </div>
+  <div id="stagebox">
+    <div id="stage"></div>
+    <div class="hint">render a looping GIF of this scene:<br>
+      <code>python tools/render_canvas_gif.py --html scenes/&lt;scene&gt;.html --fps 12</code></div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script src="scenes/sources.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), code = $('code'), err = $('err');
+  let timer = null, paused = false, acc = 0;
+
+  // fill scene picker
+  const names = Object.keys(window.SCENES || {});
+  for (const n of names) {
+    const o = document.createElement('option');
+    o.value = n;
+    o.textContent = `${n} — ${window.SCENES[n].title.slice(0, 48)}`;
+    $('scene').appendChild(o);
+  }
+
+  const speed = () => parseFloat($('speed').value);
+  const fps = () => parseInt($('fps').value, 10);
+
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  function start() {
+    stop();
+    timer = setInterval(() => {
+      if (paused || typeof window.draw !== 'function') return;
+      acc += speed();
+      let n = Math.floor(acc); acc -= n;
+      while (n-- > 0) { try { window.draw(); } catch (e) { showErr(e); stop(); return; } }
+    }, 1000 / fps());
+  }
+
+  function showErr(e) { err.textContent = String(e); }
+
+  function runCode() {
+    err.textContent = '';
+    stage.innerHTML = '';               // drop old canvas; createCanvas appends here
+    window.draw = undefined;
+    window.__frames = null;
+    window.WATERMARK = '';
+    window.FORMULA = null;
+    acc = 0; paused = false; $('pause').textContent = 'Pause';
+    try {
+      (0, eval)(code.value);            // scenes are plain globals-style sketches
+    } catch (e) { showErr(e); return; }
+    start();
+  }
+
+  function loadScene(name) {
+    code.value = window.SCENES[name].code;
+    runCode();
+  }
+
+  $('scene').addEventListener('change', e => loadScene(e.target.value));
+  $('run').addEventListener('click', runCode);
+  $('reset').addEventListener('click', runCode);
+  $('pause').addEventListener('click', () => {
+    paused = !paused;
+    $('pause').textContent = paused ? 'Resume' : 'Pause';
+  });
+  $('fps').addEventListener('input', () => { $('fpsval').textContent = fps(); start(); });
+  $('speed').addEventListener('input', () => { $('speedval').textContent = speed() + '×'; });
+  code.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); }
+  });
+
+  const initial = new URLSearchParams(location.search).get('scene');
+  const pick = names.includes(initial) ? initial : (names.includes('dragon') ? 'dragon' : names[0]);
+  if (names.length) { $('scene').value = pick; loadScene(pick); }
+  else err.textContent = 'scenes/sources.js missing — run: python tools/build_player_sources.py';
+})();
+</script>
+</body>
+</html>

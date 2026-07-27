@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NOTE: scenes/sources.js is generated (tools/build_player_sources.py) but IS
+# committed — player.html needs it to work from file:// with zero build steps.
