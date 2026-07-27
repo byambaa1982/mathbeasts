@@ -1,63 +1,193 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mathbeasts — live playground</title>
+<meta name="description" content="Creatures made of 20,000 dots and a few lines of trig. Edit the math, watch it live.">
 <style>
-  :root { color-scheme: dark; }
-  html, body { margin: 0; padding: 0; background: #090909; color: #cfcfcf;
-               font: 13px/1.5 system-ui, sans-serif; height: 100%; }
-  #wrap { display: flex; gap: 16px; padding: 16px; height: calc(100% - 32px); }
-  #panel { flex: 1 1 480px; display: flex; flex-direction: column; gap: 10px; min-width: 320px; }
-  #stagebox { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-  #stage { width: 400px; height: 400px; background: #000; border: 1px solid #222; }
-  #stage canvas { width: 400px !important; height: 400px !important; }
-  h1 { font-size: 15px; margin: 0; color: #fff; font-weight: 600; }
-  h1 span { color: #666; font-weight: 400; }
-  select, button { background: #161616; color: #ddd; border: 1px solid #333;
-                   border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
-  button:hover, select:hover { border-color: #555; }
-  button.primary { background: #1e3a5f; border-color: #2d5a8f; color: #fff; }
-  #code { flex: 1; background: #0e0e0e; color: #b8e0b8; border: 1px solid #262626;
-          border-radius: 8px; padding: 10px; font: 12px/1.45 Consolas, monospace;
-          white-space: pre; resize: none; tab-size: 2; }
-  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .row label { color: #888; }
-  input[type=range] { width: 140px; accent-color: #4a90d9; }
-  #speedval, #fpsval { color: #fff; min-width: 42px; display: inline-block; }
-  #err { color: #ff7b72; font-family: Consolas, monospace; font-size: 12px; min-height: 16px; }
-  .hint { color: #555; font-size: 12px; }
-  kbd { background: #1c1c1c; border: 1px solid #333; border-radius: 4px; padding: 0 5px; }
+  :root {
+    color-scheme: dark;
+    --bg: #090909;
+    --card: #111113;
+    --line: #232328;
+    --ink: #d6d6db;
+    --dim: #77777f;
+    --faint: #4a4a52;
+    --a1: #67e8f9;   /* cyan  */
+    --a2: #a78bfa;   /* violet */
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+               font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { min-height: 100svh; display: flex; flex-direction: column; align-items: center;
+         background:
+           radial-gradient(600px 380px at 50% 220px, rgba(103,232,249,.055), transparent 70%),
+           radial-gradient(500px 320px at 50% 260px, rgba(167,139,250,.045), transparent 70%),
+           var(--bg); }
+  main { width: 100%; max-width: 640px; padding: 0 16px 40px; display: flex;
+         flex-direction: column; align-items: center; gap: 18px; }
+
+  /* ---------- header ---------- */
+  header { width: 100%; max-width: 640px; display: flex; align-items: baseline;
+           justify-content: space-between; padding: 18px 16px 4px; }
+  h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  h1 b { background: linear-gradient(90deg, var(--a1), var(--a2));
+         -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 small { color: var(--dim); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  .gh { color: var(--dim); text-decoration: none; font-size: 13px; border: 1px solid var(--line);
+        border-radius: 99px; padding: 5px 12px; transition: .15s; white-space: nowrap; }
+  .gh:hover { color: var(--ink); border-color: var(--faint); }
+
+  /* ---------- stage ---------- */
+  #stagewrap { position: relative; width: min(400px, 100%); }
+  #stage { width: 100%; aspect-ratio: 1; background: #000; border-radius: 18px;
+           overflow: hidden; cursor: pointer; border: 1px solid var(--line);
+           box-shadow: 0 0 0 1px rgba(255,255,255,.02), 0 24px 70px -22px rgba(103,232,249,.18),
+                       0 10px 40px -10px rgba(0,0,0,.8); }
+  #stage canvas { width: 100% !important; height: 100% !important; display: block; }
+  #overlay { position: absolute; inset: 0; display: none; align-items: center; border-radius: 18px;
+             justify-content: center; background: rgba(5,5,7,.35); backdrop-filter: blur(1.5px);
+             pointer-events: none; }
+  #overlay span { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+                  background: rgba(12,12,16,.75); border: 1px solid var(--faint);
+                  font-size: 22px; padding-left: 4px; }
+  body.paused #overlay { display: flex; }
+
+  /* ---------- scene chips ---------- */
+  #chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  #chips button { font: inherit; font-size: 14px; color: var(--dim); background: var(--card);
+                  border: 1px solid var(--line); border-radius: 99px; padding: 8px 16px;
+                  cursor: pointer; transition: .15s; display: flex; gap: 7px; align-items: center; }
+  #chips button:hover { color: var(--ink); border-color: var(--faint); }
+  #chips button.on { color: #fff; border-color: transparent;
+                     background:
+                       linear-gradient(var(--card), var(--card)) padding-box,
+                       linear-gradient(90deg, var(--a1), var(--a2)) border-box; }
+  #chips .em { font-size: 17px; line-height: 1; }
+
+  /* ---------- controls card ---------- */
+  .card { width: 100%; background: var(--card); border: 1px solid var(--line);
+          border-radius: 16px; padding: 16px 18px; }
+  .srow { display: grid; grid-template-columns: 52px 1fr 58px; gap: 12px; align-items: center;
+          padding: 8px 0; }
+  .srow label { color: var(--dim); font-size: 13px; text-transform: uppercase;
+                letter-spacing: .08em; }
+  .srow output { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink);
+                 font-size: 14px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 26px;
+                      background: transparent; cursor: pointer; margin: 0; }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--a1) var(--fill, 50%), #26262c var(--fill, 50%)); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px;
+      border-radius: 50%; background: #fff; margin-top: -7px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.6); border: none; }
+  input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: #26262c; }
+  input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--a1); }
+  input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: none; box-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  #motion { color: var(--faint); font-size: 12.5px; text-align: center; padding-top: 6px; }
+  #motion b { color: var(--dim); font-weight: 600; }
+
+  .btns { display: flex; gap: 10px; justify-content: center; padding-top: 12px; flex-wrap: wrap; }
+  .btns button { font: inherit; font-size: 14px; color: var(--ink); background: #17171b;
+                 border: 1px solid var(--line); border-radius: 10px; padding: 9px 16px;
+                 cursor: pointer; transition: .15s; min-width: 104px; }
+  .btns button:hover { border-color: var(--faint); background: #1c1c21; }
+  .btns button:active { transform: translateY(1px); }
+
+  /* ---------- editor ---------- */
+  details.card { padding: 0; overflow: hidden; }
+  summary { list-style: none; cursor: pointer; padding: 14px 18px; color: var(--dim);
+            font-size: 14px; display: flex; align-items: center; gap: 10px; transition: .15s;
+            user-select: none; }
+  summary:hover { color: var(--ink); }
+  summary::-webkit-details-marker { display: none; }
+  summary .tri { transition: transform .2s; font-size: 11px; color: var(--faint); }
+  details[open] summary .tri { transform: rotate(90deg); }
+  .edbody { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  #code { width: 100%; height: 340px; background: #0c0c0e; color: #b8e0b8;
+          border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+          font: 12.5px/1.5 ui-monospace, Consolas, Menlo, monospace;
+          white-space: pre; resize: vertical; tab-size: 2; outline: none; }
+  #code:focus { border-color: #2e4a55; }
+  .edrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #run { font: inherit; font-size: 14px; font-weight: 600; color: #08181c; cursor: pointer;
+         background: linear-gradient(90deg, var(--a1), var(--a2)); border: none;
+         border-radius: 10px; padding: 10px 20px; transition: .15s; }
+  #run:hover { filter: brightness(1.1); }
+  #run:active { transform: translateY(1px); }
+  kbd { background: #1c1c21; border: 1px solid var(--line); border-radius: 5px;
+        padding: 1px 6px; font-size: 11.5px; color: var(--dim); }
+  #err { color: #ff7b72; font: 12px ui-monospace, Consolas, monospace; min-height: 15px;
+         flex: 1 1 200px; }
+  .hint { color: var(--faint); font-size: 12.5px; }
+  .hint code { color: var(--dim); }
+
+  footer { color: var(--faint); font-size: 12.5px; padding: 6px 16px 28px; text-align: center; }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (max-width: 480px) {
+    header { padding: 14px 16px 2px; }
+    h1 small { display: none; }
+    .srow { grid-template-columns: 46px 1fr 50px; }
+    #code { height: 260px; font-size: 12px; }
+    .btns button { flex: 1 1 30%; min-width: 0; }
+  }
 </style>
 </head>
 <body>
-<div id="wrap">
-  <div id="panel">
-    <h1>mathbeasts playground <span>— edit the math, watch it live</span></h1>
-    <div class="row">
-      <select id="scene"></select>
-      <button id="run" class="primary">Run ▸ (Ctrl+Enter)</button>
-      <button id="pause">Pause</button>
-      <button id="reset">Restart</button>
-    </div>
-    <textarea id="code" spellcheck="false"></textarea>
-    <div class="row">
-      <label>speed <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1">
-        <span id="speedval">1×</span></label>
-      <label>fps <input id="fps" type="range" min="5" max="60" step="1" value="30">
-        <span id="fpsval">30</span></label>
-    </div>
-    <div id="err"></div>
-    <div class="hint">Tweak any number — the <code>t +=</code> step (dt), particle count
-      (<code>2e4</code>), trig coefficients, alpha — then <kbd>Ctrl</kbd>+<kbd>Enter</kbd>.
-      speed = extra draw() steps per tick; fps = ticks per second.</div>
-  </div>
-  <div id="stagebox">
+<header>
+  <h1>math<b>beasts</b><small>edit the math, watch it live</small></h1>
+  <a class="gh" href="https://github.com/byambaa1982/mathbeasts" target="_blank" rel="noopener">GitHub ↗</a>
+</header>
+<main>
+  <div id="stagewrap" title="tap to pause / resume">
     <div id="stage"></div>
-    <div class="hint">render a looping GIF of this scene:<br>
-      <code>python tools/render_canvas_gif.py --html scenes/&lt;scene&gt;.html --fps 12</code></div>
+    <div id="overlay"><span>▶</span></div>
   </div>
-</div>
+
+  <nav id="chips" aria-label="beasts"></nav>
+
+  <section class="card" aria-label="playback controls">
+    <div class="srow">
+      <label for="speed">speed</label>
+      <input id="speed" type="range" min="0.25" max="8" step="0.25" value="1">
+      <output id="speedval">1×</output>
+    </div>
+    <div class="srow">
+      <label for="fps">fps</label>
+      <input id="fps" type="range" min="5" max="60" step="1" value="30">
+      <output id="fpsval">30</output>
+    </div>
+    <div id="motion">motion ≈ <b>×1.0</b> natural &nbsp;·&nbsp; on-screen speed = dt × speed × fps</div>
+    <div class="btns">
+      <button id="pause">⏸ Pause</button>
+      <button id="reset">↺ Restart</button>
+      <button id="snap">📷 Frame</button>
+    </div>
+  </section>
+
+  <details class="card" id="editor">
+    <summary><span class="tri">▶</span> Edit the math — every number is a parameter</summary>
+    <div class="edbody">
+      <textarea id="code" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+      <div class="edrow">
+        <button id="run">Run ▸</button>
+        <span class="hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs &nbsp;·&nbsp; <kbd>Space</kbd> pauses</span>
+        <span id="err"></span>
+      </div>
+      <div class="hint">Tweak the <code>t +=</code> step (dt), particle count (<code>2e4</code>),
+        trig coefficients, alpha (<code>stroke(w, 96)</code>) — break it freely, Restart brings the
+        beast back. Render a looping GIF:
+        <code>python tools/render_canvas_gif.py --html scenes/&lt;beast&gt;.html --fps 12</code></div>
+    </div>
+  </details>
+</main>
+<footer>
+  20,000 dots · a few lines of trig · <a href="https://github.com/byambaa1982/mathbeasts">MIT, fork your own beast</a>
+</footer>
 
 <script src="engine.js"></script>
 <script src="scenes/sources.js"></script>
@@ -65,19 +195,32 @@
 (() => {
   const $ = id => document.getElementById(id);
   const stage = $('stage'), code = $('code'), err = $('err');
-  let timer = null, paused = false, acc = 0;
+  const EMOJI = { dragon: '🐉', jellyfish: '🪼', butterfly: '🦋' };
+  let timer = null, paused = false, acc = 0, current = null;
 
-  // fill scene picker
   const names = Object.keys(window.SCENES || {});
   for (const n of names) {
-    const o = document.createElement('option');
-    o.value = n;
-    o.textContent = `${n} — ${window.SCENES[n].title.slice(0, 48)}`;
-    $('scene').appendChild(o);
+    const b = document.createElement('button');
+    b.innerHTML = `<span class="em">${EMOJI[n] || '✦'}</span>${n}`;
+    b.addEventListener('click', () => loadScene(n));
+    b.dataset.name = n;
+    $('chips').appendChild(b);
   }
 
   const speed = () => parseFloat($('speed').value);
   const fps = () => parseInt($('fps').value, 10);
+
+  function paint(slider) {   // fill the track up to the thumb (webkit)
+    const pc = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+    slider.style.setProperty('--fill', pc + '%');
+  }
+
+  function motion() {
+    // natural speed reference: dt × 30 draws/sec (how these run at 30fps, 1 step)
+    const x = (speed() * fps() / 30).toFixed(2).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    $('motion').innerHTML =
+      `motion ≈ <b>×${x}</b> natural &nbsp;·&nbsp; on-screen speed = dt × speed × fps`;
+  }
 
   function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
@@ -93,6 +236,12 @@
 
   function showErr(e) { err.textContent = String(e); }
 
+  function setPaused(p) {
+    paused = p;
+    document.body.classList.toggle('paused', p);
+    $('pause').textContent = p ? '▶ Resume' : '⏸ Pause';
+  }
+
   function runCode() {
     err.textContent = '';
     stage.innerHTML = '';               // drop old canvas; createCanvas appends here
@@ -100,7 +249,7 @@
     window.__frames = null;
     window.WATERMARK = '';
     window.FORMULA = null;
-    acc = 0; paused = false; $('pause').textContent = 'Pause';
+    acc = 0; setPaused(false);
     try {
       (0, eval)(code.value);            // scenes are plain globals-style sketches
     } catch (e) { showErr(e); return; }
@@ -108,26 +257,42 @@
   }
 
   function loadScene(name) {
+    current = name;
     code.value = window.SCENES[name].code;
+    for (const b of $('chips').children) b.classList.toggle('on', b.dataset.name === name);
+    try { history.replaceState(null, '', '?scene=' + name); } catch (_) {}
     runCode();
   }
 
-  $('scene').addEventListener('change', e => loadScene(e.target.value));
   $('run').addEventListener('click', runCode);
-  $('reset').addEventListener('click', runCode);
-  $('pause').addEventListener('click', () => {
-    paused = !paused;
-    $('pause').textContent = paused ? 'Resume' : 'Pause';
+  $('reset').addEventListener('click', () => current ? loadScene(current) : runCode());
+  $('pause').addEventListener('click', () => setPaused(!paused));
+  $('stagewrap').addEventListener('click', () => setPaused(!paused));
+  $('snap').addEventListener('click', () => {
+    const c = stage.querySelector('canvas');
+    if (!c) return;
+    const a = document.createElement('a');
+    a.download = (current || 'beast') + '.png';
+    a.href = c.toDataURL('image/png');
+    a.click();
   });
-  $('fps').addEventListener('input', () => { $('fpsval').textContent = fps(); start(); });
-  $('speed').addEventListener('input', () => { $('speedval').textContent = speed() + '×'; });
+  $('fps').addEventListener('input', e => { paint(e.target); $('fpsval').textContent = fps(); motion(); start(); });
+  $('speed').addEventListener('input', e => { paint(e.target); $('speedval').textContent = speed() + '×'; motion(); });
   code.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); }
   });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !/TEXTAREA|INPUT/.test(document.activeElement.tagName)) {
+      e.preventDefault(); setPaused(!paused);
+    }
+  });
+
+  paint($('speed')); paint($('fps')); motion();
+  if (window.innerWidth > 860) $('editor').open = true;
 
   const initial = new URLSearchParams(location.search).get('scene');
   const pick = names.includes(initial) ? initial : (names.includes('dragon') ? 'dragon' : names[0]);
-  if (names.length) { $('scene').value = pick; loadScene(pick); }
+  if (names.length) loadScene(pick);
   else err.textContent = 'scenes/sources.js missing — run: python tools/build_player_sources.py';
 })();
 </script>
