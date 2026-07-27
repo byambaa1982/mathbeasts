@@ -17,25 +17,34 @@ number that never changes frame-to-frame.
 
 ## Dragon — `scenes/dragon.js`
 
-Built constructively: a parametric **spine** with a traveling wave, and every
-body part placed relative to it. For $s \in [-0.06, 1]$ (head at $s=0$,
-negative $s$ = snout):
+A Chinese dragon coiled in a spiral, chasing a flaming pearl. The **spine**
+is a spiral in polar form — angle sweeps $\theta = 7.3s - 1.15$ while the
+radius shrinks and carries a traveling wave (the swimming):
 
 $$
-\begin{aligned}
-\text{spine}(s) &= \big(330 - 288s + 10s\sin(2s + 2t),\;\; 140 + 130s + (14 + 44s)\sin(6s - t)\big) \\
-R(s) &= 2.5 + 15\sin \pi s\,(1 - 0.55 s) + 8\,e^{-(s-0.03)^2/0.004}
-\end{aligned}
+\text{spine}(s) = C + \big(146 - 84s + 10\sin(5s - t)\big)\,(\cos\theta,\; 0.84\sin\theta),
+\qquad s \in [-0.028, 1]
 $$
 
-The $\sin(6s - t)$ term is a wave traveling head→tail (the swimming); the
-Gaussian bump in $R$ is the skull. Particles are assigned roles by residue:
-75% form rib-rings around the spine at $\pm\hat n\,R(s)\cos(i\varphi)$,
-12.5% draw sawtooth dorsal spikes of height
-$(10 + 15\sin\pi s)(1 - \operatorname{frac} 16s)$, and the rest split into
-horns, whiskers, an eye (a dense particle disc reads as a bright pupil),
-and a tail tuft. $\Delta t = \pi/40$, $t$ coefficients $\{1, 2\}$ →
-period $2\pi$ = 80 frames.
+(head at $s = 0$, negative $s$ = snout; the $0.84$ squashes the coil into a
+slight ellipse). The body radius is a tapered tube with a Gaussian skull:
+
+$$
+R(s) = 2.2 + 13\sin^{0.7}\!\pi s\,(1 - 0.55s) + 11\,e^{-(s-0.02)^2/0.0045}
+$$
+
+Roles by residue (`i % 10`): 70% form rib-rings around the spine at
+$\pm\hat n\,R(s)\cos(i\varphi)$ (with the ring radius roughened by
+$\operatorname{frac}(i\sqrt5)$ so the tube reads organic, not lathed);
+10% are sawtooth dorsal spikes pointing radially out of the coil; 10% are
+the **mane** — 34 filament strands along the neck ($s \le 0.15$), each
+rotated by the swaying term $13u\sin(4s - t + 1.6u)$; and 10% split by
+higher bits into forked antler horns, curling whiskers, a bright eye disc,
+the tail tuft, and the **pearl** — a dense disc floating $56$ px off the
+snout with a ring of sparks orbiting it on $\cos(i\varphi + t)$ and bobbing
+on $\sin 2t$. Head frame (snout heading $\hat F$, head-up $\hat O$) is
+computed once per frame from spine tangent and the radial direction.
+$\Delta t = \pi/40$, $t$ coefficients $\{1, 2\}$ → period $2\pi$ = 80 frames.
 
 ## Jellyfish — `scenes/jellyfish.js`
 
