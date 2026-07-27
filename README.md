@@ -1,4 +1,4 @@
-# mathbeasts 🐉
+# mathbeasts 
 
 > Creatures made of **20,000 dots and a few lines of trig** — with a live
 > playground to bend the math, and a renderer that turns any beast into a
