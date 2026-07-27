@@ -15,7 +15,7 @@ the glow. Time `t` is the only thing that moves.
 
 ```js
 // the entire dragon body, more or less:
-spine(s) = (330 − 288s,  140 + 130s + (14 + 44s)·sin(6s − t))
+spine(s) = C + (146 − 84s + 10·sin(5s − t)) · (cos θ, 0.84·sin θ),  θ = 7.3s − 1.15
 body     = spine ± n̂ · R(s)·cos(iφ)          // φ = golden angle
 ```
 
@@ -24,7 +24,7 @@ body     = spine ± n̂ · R(s)·cos(iφ)          // φ = golden angle
 | 🐉 dragon | 🪼 jellyfish | 🦋 butterfly |
 |:---:|:---:|:---:|
 | ![dragon](scenes/dragon.gif) | ![jellyfish](scenes/jellyfish.gif) | ![butterfly](scenes/butterfly.gif) |
-| traveling-wave spine, ribbed tube body, sawtooth spikes | breathing bell, scalloped frill, nine swaying tentacles | Temple Fay curve wings, flapping on `cos 2t` |
+| coiled spiral chasing a flaming pearl — mane, antler horns, whiskers | breathing bell, scalloped frill, nine swaying tentacles | Temple Fay curve wings, flapping on `cos 2t` |
 
 Each one is a single self-contained sketch in [`scenes/`](scenes) — ~40 lines
 of plain JavaScript, no dependencies. The full field equations are typeset in
