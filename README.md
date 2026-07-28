@@ -100,9 +100,7 @@ The recipe (long version in [MATH.md](MATH.md#design-recipe)):
 
 Save it as `scenes/mybeast.js` ending in `loop(FRAMES, STEP)`, copy any
 `.html` wrapper next to it, run `python tools/build_player_sources.py`, and
-it appears in the playground. Working with Claude Code? The repo ships a
-[`/new-beast`](.claude/commands/new-beast.md) workflow that designs the loop
-math and iterates the render until it passes.
+it appears in the playground.
 
 The engine ([`engine.js`](engine.js), ~100 lines) is a deliberately tiny
 p5.js-style shim: `createCanvas / background / stroke / strokeWeight / point`
