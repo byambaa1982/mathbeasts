@@ -46,6 +46,15 @@
         border-radius: 99px; padding: 5px 12px; transition: .15s; white-space: nowrap; }
   .gh:hover { color: var(--ink); border-color: var(--faint); }
 
+  /* ---------- why-GIF teaser bar ---------- */
+  #whybar { width: 100%; text-align: center; padding: 10px 14px; border-radius: 12px;
+            color: var(--dim); font-size: 13.5px; text-decoration: none; transition: .15s;
+            border: 1px solid var(--line);
+            background: linear-gradient(90deg, rgba(103,232,249,.07), rgba(167,139,250,.07)); }
+  #whybar b { color: var(--a1); font-weight: 600; white-space: nowrap; }
+  #whybar:hover { color: var(--ink); border-color: var(--faint); }
+  #whybar:hover b { text-decoration: underline; }
+
   /* ---------- stage ---------- */
   #stagewrap { position: relative; width: min(400px, 100%); }
   #stage { width: 100%; aspect-ratio: 1; background: #000; border-radius: 18px;
@@ -150,6 +159,11 @@
   <a class="gh" href="https://github.com/byambaa1982/mathbeasts" target="_blank" rel="noopener">GitHub ↗</a>
 </header>
 <main>
+  <a id="whybar" href="demo.html?scene=butterfly" target="_blank" rel="noopener">
+    💡 Why do web designers use looping GIFs as hero images?
+    <b>See this beast on a real page →</b>
+  </a>
+
   <div id="stagewrap" title="tap to pause / resume">
     <div id="stage"></div>
     <div id="overlay"><span>▶</span></div>
@@ -270,6 +284,7 @@
     current = name;
     code.value = window.SCENES[name].code;
     for (const b of $('chips').children) b.classList.toggle('on', b.dataset.name === name);
+    $('whybar').href = 'demo.html?scene=' + encodeURIComponent(name);
     try { history.replaceState(null, '', '?scene=' + name); } catch (_) {}
     runCode();
   }
