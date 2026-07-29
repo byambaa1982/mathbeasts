@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mathbeasts — live playground</title>
 <meta name="description" content="Creatures made of 20,000 dots and a few lines of trig. Edit the math, watch it live.">
+<meta property="og:title" content="mathbeasts — live playground">
+<meta property="og:description" content="Creatures made of 20,000 dots and a few lines of trig. Edit the math, watch it live.">
+<meta property="og:image" content="https://mathbeasts.vercel.app/og.png">
+<meta property="og:url" content="https://mathbeasts.vercel.app/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mathbeasts.vercel.app/og.png">
 <style>
   :root {
     color-scheme: dark;
@@ -166,6 +173,7 @@
       <button id="pause">⏸ Pause</button>
       <button id="reset">↺ Restart</button>
       <button id="snap">📷 Frame</button>
+      <button id="share" title="copy a link that opens the playground with your edited code">🔗 Share</button>
     </div>
   </section>
 
@@ -195,7 +203,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const stage = $('stage'), code = $('code'), err = $('err');
-  const EMOJI = { dragon: '🐉', jellyfish: '🪼', butterfly: '🦋' };
+  const EMOJI = { dragon: '🐉', jellyfish: '🪼', butterfly: '🦋', koi: '🐟' };
   let timer = null, paused = false, acc = 0, current = null;
 
   const names = Object.keys(window.SCENES || {});
@@ -264,6 +272,41 @@
     runCode();
   }
 
+  // Share: pack the editor's code into a #code= hash so a beast travels as a
+  // plain URL — no fork, no gist. base64url over UTF-8 bytes.
+  const b64enc = s => {
+    const bytes = new TextEncoder().encode(s);
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+  const b64dec = s => {
+    const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+    return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+  };
+
+  $('share').addEventListener('click', () => {
+    const url = location.origin + location.pathname + '#code=' + b64enc(code.value);
+    history.replaceState(null, '', url);
+    const done = () => {
+      $('share').textContent = '✓ Link copied';
+      setTimeout(() => { $('share').textContent = '🔗 Share'; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(url).then(done, done);
+    else done();
+  });
+
+  function loadShared() {
+    const m = location.hash.match(/^#code=(.+)$/);
+    if (!m) return false;
+    try { code.value = b64dec(m[1]); } catch (_) { return false; }
+    current = null;
+    for (const b of $('chips').children) b.classList.remove('on');
+    runCode();
+    return true;
+  }
+
   $('run').addEventListener('click', runCode);
   $('reset').addEventListener('click', () => current ? loadScene(current) : runCode());
   $('pause').addEventListener('click', () => setPaused(!paused));
@@ -290,10 +333,12 @@
   paint($('speed')); paint($('fps')); motion();
   if (window.innerWidth > 860) $('editor').open = true;
 
-  const initial = new URLSearchParams(location.search).get('scene');
-  const pick = names.includes(initial) ? initial : (names.includes('dragon') ? 'dragon' : names[0]);
-  if (names.length) loadScene(pick);
-  else err.textContent = 'scenes/sources.js missing — run: python tools/build_player_sources.py';
+  if (!loadShared()) {
+    const initial = new URLSearchParams(location.search).get('scene');
+    const pick = names.includes(initial) ? initial : (names.includes('dragon') ? 'dragon' : names[0]);
+    if (names.length) loadScene(pick);
+    else err.textContent = 'scenes/sources.js missing — run: python tools/build_player_sources.py';
+  }
 })();
 </script>
 </body>

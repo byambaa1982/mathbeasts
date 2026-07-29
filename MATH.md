@@ -97,6 +97,35 @@ itself brighter. Body = a slim ellipse of dots; antennae = two quadratic
 arcs with a slight $\sin(t + 3u)$ quiver.
 $t$ coefficients $\{1, 2\}$ → period $2\pi$ = 80 frames.
 
+## Koi — `scenes/koi.js`
+
+Two koi circling a pond half a lap apart, yin-yang style. The path *is* the
+clock: fish $f \in \{0,1\}$ has head angle $A = t + \pi f$, and the spine
+trails the head along the circle ($a = A - 0.92s$, $s \in [-0.06, 1]$, negative
+$s$ = snout) — so one full period $2\pi$ is exactly one lap and the loop closes
+by construction. Swimming is a radial traveling wave on the path radius:
+
+$$
+r(s) = 95 + (2 + 6|s|)\sin(5s - 2t + \pi f)
+$$
+
+The body is the dragon's rib-ring construction on a teardrop half-width
+
+$$
+W(s) = 3 + 13\sin^{0.8}\!\pi(0.1 + 0.9s)\,(1 - 0.55s)
+$$
+
+Roles by residue (`i % 10`): 70% body rings, 10% the **tail fan** — the same
+spine extended past $s=1$ with width blooming as $2 + 16u$ and a stronger
+sway; 10% **pectoral fins** — swept-back blades at $s = 0.3$ filled by two
+different irrationals, fluttering on $1 + 0.3\sin(2t + \pi f)$; 10% split into
+bright eye discs and the **ripples** — three rings expanding from the center,
+$r = 26 + 142\operatorname{frac}(k/3 + t/2\pi)$, drawn with probability
+$1 - (0.25 + 0.75\,\mathrm{frac})$ so they thin out as they grow. The ripple
+phase and the path angle both advance once per $2\pi$, matching the $\sin 2t$
+terms' half-period. $\Delta t = \pi/40$, $t$ coefficients $\{1, 2\}$ → period
+$2\pi$ = 80 frames.
+
 ---
 
 ## Why the GIF loops: the period math
@@ -119,6 +148,7 @@ which `loop(FRAMES, STEP)` must cover exactly
 | dragon | $1,\ 2$ | $2\pi$ | $\pi/40$ | 80 | `loop(80, 1)` |
 | jellyfish | $1$ | $2\pi$ | $\pi/40$ | 80 | `loop(80, 1)` |
 | butterfly | $1,\ 2$ | $2\pi$ | $\pi/40$ | 80 | `loop(80, 1)` |
+| koi | $1,\ 2$ | $2\pi$ | $\pi/40$ | 80 | `loop(80, 1)` |
 
 On-screen speed is $\Delta t \cdot \text{STEP} \cdot \text{fps}$. STEP trades
 file size against motion speed: halve the frames with STEP=2 and the GIF is

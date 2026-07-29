@@ -5,7 +5,12 @@
 > pixel-perfect looping GIF.
 
 <p align="center">
-  <img src="scenes/dragon.gif" width="420" alt="particle dragon">
+  <b>▶ Play with it right now — <a href="https://mathbeasts.vercel.app">mathbeasts.vercel.app</a></b><br>
+  <sub>no install, no build — edit the math in your browser and watch the beast change</sub>
+</p>
+
+<p align="center">
+  <a href="scenes/dragon.gif"><img src="scenes/previews/dragon.gif" width="360" alt="particle dragon"></a>
 </p>
 
 Every animal here is *one function*, evaluated 20,000 times per frame. No
@@ -21,16 +26,21 @@ body     = spine ± n̂ · R(s)·cos(iφ)          // φ = golden angle
 
 ## The beasts
 
-| 🐉 dragon | 🪼 jellyfish | 🦋 butterfly |
-|:---:|:---:|:---:|
-| ![dragon](scenes/dragon.gif) | ![jellyfish](scenes/jellyfish.gif) | ![butterfly](scenes/butterfly.gif) |
-| coiled spiral chasing a flaming pearl — mane, antler horns, whiskers | breathing bell, scalloped frill, nine swaying tentacles | Temple Fay curve wings, flapping on `cos 2t` |
+| 🐉 dragon | 🪼 jellyfish | 🦋 butterfly | 🐟 koi |
+|:---:|:---:|:---:|:---:|
+| [![dragon](scenes/previews/dragon.gif)](scenes/dragon.gif) | [![jellyfish](scenes/previews/jellyfish.gif)](scenes/jellyfish.gif) | [![butterfly](scenes/previews/butterfly.gif)](scenes/butterfly.gif) | [![koi](scenes/previews/koi.gif)](scenes/koi.gif) |
+| coiled spiral chasing a flaming pearl — mane, antler horns, whiskers | breathing bell, scalloped frill, nine swaying tentacles | Temple Fay curve wings, flapping on `cos 2t` | two koi circling like a yin-yang, ripples spreading beneath |
+
+*(click any beast for the full-resolution GIF)*
 
 Each one is a single self-contained sketch in [`scenes/`](scenes) — ~40 lines
 of plain JavaScript, no dependencies. The full field equations are typeset in
 **[MATH.md](MATH.md)**.
 
-## Try it in 10 seconds — no install
+## Try it in 2 seconds
+
+Open **[mathbeasts.vercel.app](https://mathbeasts.vercel.app)** — the full
+playground runs in your browser. Or run it locally (it's just static files):
 
 ```
 git clone https://github.com/byambaa1982/mathbeasts
@@ -39,7 +49,7 @@ git clone https://github.com/byambaa1982/mathbeasts
 Open **`player.html`** in any browser. That's it — no build, no server, no
 dependencies. Then:
 
-- **Pick a beast** from the dropdown.
+- **Pick a beast** from the chips under the stage.
 - **Drag the speed slider** (0.25×–8×) and the fps slider — on-screen motion
   is `dt × speed × fps`, so both change how the creature moves.
 - **Edit the code** in the panel and hit `Ctrl+Enter`. Every number is a
@@ -82,7 +92,7 @@ $$T = \frac{2\pi}{\gcd(a_1, a_2, \ldots)}$$
 
 Divide by `dt` to get the period in draw-steps; each scene ends with
 `loop(FRAMES, STEP)` where `FRAMES × STEP = T / dt`. Keep every `t`
-coefficient an integer or power of ½ and the period stays short. All three
+coefficient an integer or power of ½ and the period stays short. All four
 beasts use `dt = π/40` with coefficients in `{1, 2}` → exactly **80 frames
 per loop**. Derivations in [MATH.md](MATH.md).
 
@@ -100,11 +110,30 @@ The recipe (long version in [MATH.md](MATH.md#design-recipe)):
 
 Save it as `scenes/mybeast.js` ending in `loop(FRAMES, STEP)`, copy any
 `.html` wrapper next to it, run `python tools/build_player_sources.py`, and
-it appears in the playground.
+it appears in the playground. (In pull requests you can skip the rendering —
+a GitHub Action re-renders every GIF and rebuilds the player sources when a
+scene changes.)
 
 The engine ([`engine.js`](engine.js), ~100 lines) is a deliberately tiny
 p5.js-style shim: `createCanvas / background / stroke / strokeWeight / point`
 plus the math globals. If a sketch needs `noise()` or HSB color, extend it.
+
+## Share your beast
+
+Two ways, by increasing permanence:
+
+- **Send a link** — hit **🔗 Share** in the
+  [playground](https://mathbeasts.vercel.app): your edited code is packed
+  into the URL itself, so anyone who opens the link sees *your* beast running
+  live. No fork, no account, no server.
+- **Join the gallery** — open a PR adding `scenes/<beast>.js` (+ a copy of
+  any `.html` wrapper). If it's an original creature that follows the recipe
+  above and loops seamlessly, it gets merged into the playground and listed
+  here with credit. CI renders the GIF for you.
+
+### Community gallery
+
+*Nothing here yet — the first merged beast starts it. PRs welcome.*
 
 ## License
 

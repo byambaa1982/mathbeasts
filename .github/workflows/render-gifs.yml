@@ -1,0 +1,59 @@
+# Re-render every beast's GIF (full + 200px preview) and rebuild the player
+# sources whenever a scene or the engine changes. The renderer is
+# deterministic (window.__seek steps exact frames), so CI output matches a
+# local render bit-for-bit intent-wise — GIFs are build artifacts, never
+# hand-edited.
+name: render-gifs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scenes/**.js"
+      - "scenes/**.html"
+      - "engine.js"
+      - "tools/render_canvas_gif.py"
+      - "tools/build_player_sources.py"
+      - "!scenes/sources.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install renderer deps
+        run: |
+          pip install -r tools/requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Render all beasts (full + preview)
+        run: |
+          shopt -s nullglob
+          for html in scenes/*.html; do
+            name=$(basename "$html" .html)
+            python tools/render_canvas_gif.py --html "$html" --fps 12
+            python tools/render_canvas_gif.py --html "$html" --fps 12 \
+              --resize 200 --max-colors 64 --out "scenes/previews/$name.gif"
+          done
+          python tools/build_player_sources.py
+
+      - name: Commit rendered artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scenes/*.gif scenes/previews/*.gif scenes/sources.js
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "ci: re-render GIFs and player sources"
+            git push
+          fi
