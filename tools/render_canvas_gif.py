@@ -85,12 +85,20 @@ def main() -> None:
     ap.add_argument("--size", default="400x400", help="viewport WxH")
     ap.add_argument("--scale", type=float, default=2.0, help="device scale factor")
     ap.add_argument("--max-colors", type=int, default=128)
+    ap.add_argument("--resize", type=int,
+                    help="downscale captured frames to NxN px before encoding "
+                         "(e.g. 200 for a small preview GIF)")
+    ap.add_argument("--out", help="output path (default: <html>.gif next to the sketch)")
     a = ap.parse_args()
 
     html_path = Path(a.html)
     width, height = (int(x) for x in a.size.lower().split("x"))
     frames = asyncio.run(capture(html_path, a.frames, width, height, a.scale))
-    save_gif(frames, html_path.with_suffix(".gif"), a.fps, a.max_colors)
+    if a.resize:
+        frames = [f.resize((a.resize, a.resize), Image.LANCZOS) for f in frames]
+    out_path = Path(a.out) if a.out else html_path.with_suffix(".gif")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    save_gif(frames, out_path, a.fps, a.max_colors)
 
 
 if __name__ == "__main__":
