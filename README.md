@@ -64,7 +64,14 @@ dependencies. Then:
 | `WATERMARK = '...'` | your signature in the corner (`''` to disable) |
 | `FORMULA = [...]` | the tiny math annotation in the top-left |
 
-Break it freely — `Restart` reloads the scene's original code.
+Break it freely — `Restart` reloads the scene's original code. Two more
+buttons worth knowing:
+
+- **🎲 Mutate** nudges a few random coefficients by ±20% and re-runs —
+  accidental new species guaranteed (`Restart` undoes).
+- **🌐 Hero page** downloads a ready-to-ship landing page that uses the
+  beast's looping GIF as its hero image — attention-grabbing motion that
+  autoplays everywhere from a single `<img>` tag, no video player, no JS.
 
 ## Render a perfectly-looping GIF
 
