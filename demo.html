@@ -1,0 +1,247 @@
+<!doctype html>
+<!--
+  demo.html — a real-looking website built around a mathbeast GIF hero.
+  Opened from the playground's 🌐 button (demo.html?scene=<beast>); the hero
+  image is scenes/<beast>.gif served relative, so it works on Vercel and from
+  file:// alike. Everything below the hero is a fictional studio — it exists
+  to show how a seamlessly-looping GIF drops into an actual web design.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glowdot Studio — living art for brands that move</title>
+<meta name="description" content="Demo site: a mathbeast looping GIF as a website hero image.">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #090909;
+    --card: #111113;
+    --line: #232328;
+    --ink: #d6d6db;
+    --dim: #9a9aa3;
+    --faint: #5a5a63;
+    --a1: #67e8f9;
+    --a2: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink);
+         font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1, h2, h3 { color: #fff; letter-spacing: -0.02em; }
+  a { color: inherit; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 22px; }
+  .grad { background: linear-gradient(90deg, var(--a1), var(--a2));
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ---------- nav ---------- */
+  nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+        background: rgba(9,9,9,.78); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; gap: 26px; height: 62px; }
+  .logo { font-weight: 700; font-size: 18px; text-decoration: none; margin-right: auto; }
+  .logo i { font-style: normal; }
+  nav a.item { text-decoration: none; color: var(--dim); font-size: 14.5px; transition: .15s; }
+  nav a.item:hover { color: #fff; }
+  nav a.cta { text-decoration: none; font-size: 14px; font-weight: 600; color: #08181c;
+              background: linear-gradient(90deg, var(--a1), var(--a2));
+              padding: 8px 16px; border-radius: 99px; }
+  @media (max-width: 620px) { nav a.item { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { min-height: calc(100svh - 62px); display: grid; align-items: center;
+          grid-template-columns: 1.05fr 1fr; gap: 40px; padding: 48px 0;
+          background: radial-gradient(720px 460px at 68% 42%, rgba(103,232,249,.08), transparent 70%); }
+  .hero h1 { font-size: clamp(36px, 5.2vw, 58px); line-height: 1.08; margin-bottom: 18px; }
+  .hero p.lead { color: var(--dim); max-width: 46ch; margin-bottom: 26px; }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btns a { text-decoration: none; padding: 13px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; }
+  .btns .go { color: #08181c; background: linear-gradient(90deg, var(--a1), var(--a2)); }
+  .btns .alt { border: 1px solid var(--line); color: var(--ink); }
+  .btns .alt:hover { border-color: var(--faint); }
+  .heroart { text-align: center; }
+  .heroart img { width: min(420px, 100%); border-radius: 22px; border: 1px solid var(--line);
+                 box-shadow: 0 40px 110px -40px rgba(103,232,249,.35); }
+  .heroart figcaption { color: var(--faint); font-size: 12.5px; margin-top: 12px; }
+  .heroart figcaption b { color: var(--dim); font-weight: 600; }
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; text-align: center; padding: 40px 0 56px; }
+    .hero p.lead { margin: 0 auto 26px; }
+    .btns { justify-content: center; }
+    .heroart { order: -1; }
+    .heroart img { width: min(320px, 82vw); }
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 84px 0; border-top: 1px solid var(--line); }
+  .kicker { color: var(--a1); font-size: 13px; font-weight: 700; letter-spacing: .14em;
+            text-transform: uppercase; margin-bottom: 10px; }
+  section h2 { font-size: clamp(26px, 3.4vw, 34px); margin-bottom: 14px; }
+  section p.sub { color: var(--dim); max-width: 62ch; }
+
+  .about { display: grid; grid-template-columns: 1.2fr .8fr; gap: 44px; align-items: start; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 18px; }
+  .stat b { display: block; font-size: 26px; color: #fff; }
+  .stat span { color: var(--dim); font-size: 13.5px; }
+  @media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+           gap: 16px; margin-top: 34px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+          padding: 22px; transition: .15s; }
+  .card:hover { border-color: var(--faint); transform: translateY(-2px); }
+  .card .em { font-size: 26px; }
+  .card h3 { font-size: 17.5px; margin: 12px 0 8px; }
+  .card p { color: var(--dim); font-size: 14.5px; }
+
+  .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
+  form { display: flex; flex-direction: column; gap: 12px; }
+  input, textarea { font: inherit; color: var(--ink); background: var(--card);
+                    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+                    outline: none; width: 100%; resize: vertical; }
+  input:focus, textarea:focus { border-color: #2e4a55; }
+  form button { font: inherit; font-weight: 600; font-size: 15px; color: #08181c; border: none;
+                cursor: pointer; background: linear-gradient(90deg, var(--a1), var(--a2));
+                padding: 13px; border-radius: 10px; }
+  .contact ul { list-style: none; padding: 0; margin-top: 18px; color: var(--dim); }
+  .contact li { padding: 6px 0; }
+  .contact li b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 860px) { .contact { grid-template-columns: 1fr; } }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 34px; color: var(--faint);
+           font-size: 13.5px; }
+  footer .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#home">glow<i class="grad">dot</i></a>
+    <a class="item" href="#home">Home</a>
+    <a class="item" href="#about">About</a>
+    <a class="item" href="#services">Services</a>
+    <a class="item" href="#contact">Contact</a>
+    <a class="cta" id="remix-top" href="player.html">Open the playground</a>
+  </div>
+</nav>
+
+<header class="hero wrap" id="home">
+  <div>
+    <h1>Living art for brands<br>that <span class="grad">move</span></h1>
+    <p class="lead">We turn a few lines of trigonometry into creatures made of
+      20,000 glowing dots — seamlessly-looping animations that make a landing
+      page impossible to scroll past.</p>
+    <div class="btns">
+      <a class="go" id="remix" href="player.html">Remix this beast live</a>
+      <a class="alt" href="#services">What we make</a>
+    </div>
+  </div>
+  <figure class="heroart">
+    <img id="heroimg" src="scenes/butterfly.gif" alt="a looping particle creature drawn from mathematics">
+    <figcaption>the <b data-beast>butterfly</b> — one function, evaluated 20,000 times
+      per frame, looping with zero seam</figcaption>
+  </figure>
+</header>
+
+<section id="about">
+  <div class="wrap about">
+    <div>
+      <div class="kicker">About</div>
+      <h2>Why our heroes are GIFs</h2>
+      <p class="sub">Motion grabs attention in the first second — before a single
+        word is read. A looping GIF autoplays everywhere from one
+        <code>&lt;img&gt;</code> tag: no video codecs, no muted-autoplay policies,
+        no player chrome, no JavaScript. And because every loop we ship is
+        mathematically exact, there is never a hard cut — the motion reads as
+        ambient atmosphere, not a repeating clip. The same file drops unchanged
+        into a GitHub README, an email, Notion or a slide deck.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>20,000</b><span>dots per frame, one function</span></div>
+      <div class="stat"><b>80</b><span>frames per seamless loop</span></div>
+      <div class="stat"><b>0</b><span>dependencies, textures or meshes</span></div>
+      <div class="stat"><b>~40</b><span>lines of JavaScript per beast</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="kicker">Services</div>
+    <h2>What we make</h2>
+    <p class="sub">Every piece is generative: designed as an equation, rendered
+      deterministically, and delivered as a pixel-perfect looping GIF.</p>
+    <div class="cards">
+      <div class="card"><span class="em">🌐</span>
+        <h3>Hero loops</h3>
+        <p>A signature creature for the top of your landing page — sized,
+           color-matched and looping seamlessly under your headline.</p></div>
+      <div class="card"><span class="em">🐉</span>
+        <h3>Custom beasts</h3>
+        <p>Your mascot rebuilt as pure mathematics: a parametric skeleton,
+           a traveling wave for motion, golden-angle sampling for the glow.</p></div>
+      <div class="card"><span class="em">📦</span>
+        <h3>Brand systems</h3>
+        <p>A family of loops for product pages, READMEs, emails and decks —
+           one aesthetic, every placement, no video player anywhere.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap contact">
+    <div>
+      <div class="kicker">Contact</div>
+      <h2>Commission a beast</h2>
+      <p class="sub">Tell us what should be alive on your homepage. We reply
+        with a sketch — literal JavaScript — within two days.</p>
+      <ul>
+        <li><b>Email</b> — hello@glowdot.example</li>
+        <li><b>Playground</b> — <a href="player.html">bend the math yourself</a></li>
+        <li><b>Source</b> — <a href="https://github.com/byambaa1982/mathbeasts">github.com/byambaa1982/mathbeasts</a></li>
+      </ul>
+    </div>
+    <form id="form">
+      <input type="text" name="name" placeholder="Your name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="msg" rows="5" placeholder="What creature should we build?" required></textarea>
+      <button type="submit" id="send">Send message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Glowdot is a fictional studio — this page demos a
+      <a href="https://github.com/byambaa1982/mathbeasts">mathbeasts</a> GIF as a hero image.</span>
+    <span><a href="player.html">playground</a> · <a href="https://github.com/byambaa1982/mathbeasts">GitHub</a></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // ?scene=<beast> picks which GIF stars in the hero (default: butterfly)
+  const raw = new URLSearchParams(location.search).get('scene') || 'butterfly';
+  const name = /^[a-z0-9_-]+$/i.test(raw) ? raw : 'butterfly';
+  const img = document.getElementById('heroimg');
+  img.src = 'scenes/' + name + '.gif';
+  img.onerror = () => { img.onerror = null; img.src = 'scenes/butterfly.gif'; };
+  for (const el of document.querySelectorAll('[data-beast]')) el.textContent = name;
+  for (const id of ['remix', 'remix-top'])
+    document.getElementById(id).href = 'player.html?scene=' + encodeURIComponent(name);
+
+  // demo form — nothing is sent anywhere
+  document.getElementById('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const b = document.getElementById('send');
+    b.textContent = '✓ Sent (demo only)';
+    setTimeout(() => { b.textContent = 'Send message'; }, 2200);
+  });
+})();
+</script>
+</body>
+</html>

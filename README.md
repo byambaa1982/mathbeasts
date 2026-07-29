@@ -69,9 +69,11 @@ buttons worth knowing:
 
 - **🎲 Mutate** nudges a few random coefficients by ±20% and re-runs —
   accidental new species guaranteed (`Restart` undoes).
-- **🌐 Hero page** downloads a ready-to-ship landing page that uses the
-  beast's looping GIF as its hero image — attention-grabbing motion that
-  autoplays everywhere from a single `<img>` tag, no video player, no JS.
+- **🌐 Web page** jumps to [`demo.html`](https://mathbeasts.vercel.app/demo.html)
+  — a real-looking website (menu, hero, about, services, contact) with the
+  current beast's looping GIF as its hero image. GIF heroes grab attention
+  with motion that autoplays everywhere from a single `<img>` tag — no video
+  player, no JS.
 
 ## Render a perfectly-looping GIF
 
