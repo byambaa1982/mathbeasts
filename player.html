@@ -335,7 +335,7 @@
 
   if (!loadShared()) {
     const initial = new URLSearchParams(location.search).get('scene');
-    const pick = names.includes(initial) ? initial : (names.includes('dragon') ? 'dragon' : names[0]);
+    const pick = names.includes(initial) ? initial : (names.includes('butterfly') ? 'butterfly' : names[0]);
     if (names.length) loadScene(pick);
     else err.textContent = 'scenes/sources.js missing — run: python tools/build_player_sources.py';
   }

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="scenes/dragon.gif"><img src="scenes/previews/dragon.gif" width="360" alt="particle dragon"></a>
+  <a href="scenes/butterfly.gif"><img src="scenes/previews/butterfly.gif" width="360" alt="particle butterfly"></a>
 </p>
 
 Every animal here is *one function*, evaluated 20,000 times per frame. No
